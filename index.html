@@ -1,1 +1,130 @@
-<h1>Hello!</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>Infovis Uebung</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css"> -->
+
+    <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <script src="bahnsteigdaten.js"></script>
+
+    <!-- External
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.5/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.5/nv.d3.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+
+    <style>
+        svg {
+            display: block;
+        }
+
+        #test1,
+        svg {
+            margin: 0px;
+            padding: 0px;
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <div class="container">
+        <div class="row">
+            <div style="margin-top: 5%">
+                <h2>Bahnsteigdaten Visualisierung</h2>
+                <p>Quelle der Bahnsteigdaten: <a href="http://data.deutschebahn.com/organization/db-regionetz-infrastruktur">DB RegioNetz Infrastruktur GmbH</a>.</p>
+                <div>
+                    <a class="button" href="index.html">Gesamt</a>
+                    <a class="button" href="#">Hoehenvergleich</a>
+                    <a class="button" href="#">Nach Bundesland</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="test1" class='with-3d-shadow with-transitions'>
+                <svg></svg>
+            </div>
+            <br>
+            <p>Die Grafik zeigt, dass die meisten Bahnsteige der deutschen Bahn nach einer von drei Hoehennormen gebaut worden sind: 35, 38 oder 55cm.</p>
+
+    <!-- Page 1
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+            <script>
+                var chart;
+                nv.addGraph(function() {
+                    chart = nv.models.scatterChart()
+                        .showDistX(true)
+                        .showDistY(true)
+                        .useVoronoi(true)
+                        .color(d3.scale.category10().range())
+                        .duration(300);
+                    chart.dispatch.on('renderEnd', function() {
+                        console.log('render complete');
+                    });
+                    chart.showLegend(false);
+                    chart.xAxis.tickFormat(d3.format('.02f'))
+                        .axisLabel('Bahnsteighoehe (cm)');
+                    chart.yAxis.tickFormat(d3.format('.02f'))
+                        .axisLabel('Bahnsteiglaenge (m)');
+                    d3.select('#test1 svg')
+                        .datum(getPlatformData(data))
+                        // .datum(randomData(4, 40))
+                        .call(chart);
+                    nv.utils.windowResize(chart.update);
+                    chart.dispatch.on('stateChange', function(e) {
+                        ('New State:', JSON.stringify(e));
+                    });
+                    return chart;
+                });
+
+                function getPlatformData(data) {
+                    var result = [],
+                        values = [],
+                        shapes = ['circle', 'cross', 'triangle-up', 'triangle-down', 'diamond', 'square'];
+
+                    group = {
+                        key: 'Bahnsteige gesamt',
+                        values: []
+                    }
+                    for (var i = 0; i < data.length; i++) {
+                        group.values.push({
+                            x: data[i].Bahnsteig_Hoehe_cm,
+                            y: parseInt(data[i].Nettobahnsteiglaenge_m),
+                            size: Math.round(1 * 100) / 100,
+                            shape: shapes[0]
+                        });
+                    }
+                    result.push(group);
+                    return result;
+                }
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>
